@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""thresholding
+
+Umbralización binaria de imágenes en escala de grises con opción de progreso.
+"""
+
 from dataclasses import dataclass
 import numpy as np
 from PIL import Image
@@ -17,9 +23,12 @@ class Thresholding:
         self.config = config
         self.console = Console()
         
-    def _log(self, msg: str):
+    def _log(self, msg: str) -> None:
         if self.config.verbose:
-            self.console.print(msg, style="bold cyan")
+            try:
+                self.console.print(msg, style="bold cyan")
+            except Exception:
+                print(msg.encode("ascii", "ignore").decode("ascii"))
             
     def run(self) -> np.ndarray:
         """Ejecuta la umbralización sobre la imagen."""

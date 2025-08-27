@@ -1,4 +1,9 @@
-# digit_classifier.py
+# -*- coding: utf-8 -*-
+"""digit_classifier
+
+Clasificador de dígitos 1..9 basado en OpenCV (HOG + k-NN) con
+preprocesado robusto y consenso sobre pequeñas variantes.
+"""
 # Clasificador robusto con OpenCV (encapsulado):
 # - Preprocesado: Otsu+INV, recorte por contorno, centrado 20x20
 # - Features: HOG (cv2.HOGDescriptor)

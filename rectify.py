@@ -1,4 +1,8 @@
-# rectify.py
+# -*- coding: utf-8 -*-
+"""rectify
+
+Estimación de esquinas y rectificación por homografía (DLT simplificado).
+"""
 from dataclasses import dataclass
 from typing import Tuple
 import numpy as np
@@ -23,9 +27,12 @@ class CornerRectifier:
     # --------------------------
     # Utilidades de registro
     # --------------------------
-    def _log(self, msg: str):
+    def _log(self, msg: str) -> None:
         if self.cfg.verbose:
-            self.console.print(msg, style="bold cyan")
+            try:
+                self.console.print(msg, style="bold cyan")
+            except Exception:
+                print(msg.encode("ascii", "ignore").decode("ascii"))
 
     # --------------------------
     # 1) Estimación de esquinas

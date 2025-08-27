@@ -1,10 +1,17 @@
+# -*- coding: utf-8 -*-
+"""utilities
+
+Funciones de ayuda para procesamiento de imagen y un detector
+de bordes basado en lógica difusa (Mamdani) con LUT acelerada.
+"""
+
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Optional
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
 from rich.console import Console
-from tf import LinguisticVariable, FuzzySet, gaussmf, trimf, mamdani, centroid
+from tinyfuzzy import LinguisticVariable, FuzzySet, gaussmf, trimf, mamdani, centroid
 
 
 def convolution(img: np.ndarray, kernel: np.ndarray, verbose: bool = False, desc: str = "Convolución") -> np.ndarray:
@@ -42,19 +49,24 @@ class FuzzyEdgeDetector:
     def __init__(self, config: FuzzyEdgeConfig):
         self.config = config
         self.console = Console()
-        self.image: np.ndarray = None
-        self.grad_x: np.ndarray = None
-        self.grad_y: np.ndarray = None
-        self.output_img: np.ndarray = None
+        self.image: Optional[np.ndarray] = None
+        self.grad_x: Optional[np.ndarray] = None
+        self.grad_y: Optional[np.ndarray] = None
+        self.output_img: Optional[np.ndarray] = None
 
         # Construir FIS al inicializar
         self.variables, self.rules = self._build_fis()
         self._build_lut()
 
-    def _log(self, msg: str):
-        """Imprime mensajes solo si verbose=True."""
+    def _log(self, msg: str) -> None:
+        """Imprime mensajes solo si verbose=True, con fallback ASCII en Windows."""
         if self.config.verbose:
-            self.console.print(msg, style="bold cyan")
+            try:
+                self.console.print(msg, style="bold cyan")
+            except Exception:
+                # Fallback por si la consola no soporta algunos caracteres Unicode
+                safe = msg.encode("ascii", "ignore").decode("ascii")
+                print(safe)
 
     def _load_image(self) -> np.ndarray:
         self._log("[2/4] Cargando imagen...")

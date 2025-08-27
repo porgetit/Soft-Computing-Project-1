@@ -1,4 +1,8 @@
-# connected_components.py
+# -*- coding: utf-8 -*-
+"""connected_components
+
+Etiquetado BFS 8-conexo y extracción del mayor componente binario.
+"""
 from dataclasses import dataclass
 import numpy as np
 from PIL import Image
@@ -20,9 +24,12 @@ class ConnectedComponents:
         self.config = config
         self.console = Console()
 
-    def _log(self, msg: str):
+    def _log(self, msg: str) -> None:
         if self.config.verbose:
-            self.console.print(msg, style="bold cyan")
+            try:
+                self.console.print(msg, style="bold cyan")
+            except Exception:
+                print(msg.encode("ascii", "ignore").decode("ascii"))
 
     def _get_neighbors(self, i, j, h, w):
         """8-conectividad"""

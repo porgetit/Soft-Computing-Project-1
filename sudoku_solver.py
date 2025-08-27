@@ -1,4 +1,8 @@
-# sudoku_solver.py
+# -*- coding: utf-8 -*-
+"""sudoku_solver
+
+Solver de Sudoku por backtracking con poda y heurística MRV.
+"""
 from dataclasses import dataclass
 from typing import List, Optional, Set, Tuple
 from rich.console import Console
@@ -49,7 +53,7 @@ class SudokuSolver:
             if self._backtrack(board):
                 return True
             board[r][c] = 0
-        self._log(f"Retrocendiendo en ({r},{c})")
+        self._log(f"Retrocediendo en ({r},{c})")
         return False
 
     def _select_cell(self, board: List[List[int]]) -> Optional[Tuple[int, int, Set[int]]]:
@@ -77,20 +81,23 @@ class SudokuSolver:
 
     def _log(self, msg: str) -> None:
         if self.verbose:
-            self.console.print(msg, style="bold cyan")
+            try:
+                self.console.print(msg, style="bold cyan")
+            except Exception:
+                print(msg.encode("ascii", "ignore").decode("ascii"))
 
 
 if __name__ == "__main__":
     ejemplo = [
-        [5, 3, 0, 0, 7, 0, 0, 0, 0],
-        [6, 0, 0, 1, 9, 5, 0, 0, 0],
-        [0, 9, 8, 0, 0, 0, 0, 6, 0],
-        [8, 0, 0, 0, 6, 0, 0, 0, 3],
-        [4, 0, 0, 8, 0, 3, 0, 0, 1],
-        [7, 0, 0, 0, 2, 0, 0, 0, 6],
-        [0, 6, 0, 0, 0, 0, 2, 8, 0],
-        [0, 0, 0, 4, 1, 9, 0, 0, 5],
-        [0, 0, 0, 0, 8, 0, 0, 7, 9],
+        [0, 0, 0, 0, 0, 0, 2, 0, 3],
+        [8, 0, 5, 2, 0, 0, 0, 0, 0],
+        [0, 0, 3, 1, 0, 0, 4, 0, 0],
+        [0, 0, 2, 0, 0, 1, 0, 0, 5],
+        [0, 5, 8, 6, 0, 2, 3, 1, 0],
+        [3, 0, 0, 9, 0, 0, 6, 0, 0],
+        [0, 0, 4, 0, 0, 8, 5, 0, 0],
+        [0, 0, 0, 0, 0, 3, 9, 0, 8],
+        [9, 0, 1, 0, 0, 0, 0, 0, 0],
     ]
     solver = SudokuSolver(ejemplo, verbose=True)
     solucion = solver.solve()

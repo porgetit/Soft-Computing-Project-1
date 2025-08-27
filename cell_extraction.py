@@ -1,4 +1,9 @@
+# -*- coding: utf-8 -*-
+"""cell_extraction
 
+Divide una imagen de Sudoku rectificada en celdas individualmente recortadas,
+con soporte para recortes espejo de una versión binaria.
+"""
 from dataclasses import dataclass
 from typing import List, Tuple, Optional
 import os
@@ -33,9 +38,12 @@ class CellExtractor:
         self.cfg = config
         self.console = Console()
 
-    def _log(self, msg: str):
+    def _log(self, msg: str) -> None:
         if self.cfg.verbose:
-            self.console.print(msg, style="bold cyan")
+            try:
+                self.console.print(msg, style="bold cyan")
+            except Exception:
+                print(msg.encode("ascii", "ignore").decode("ascii"))
 
     def _ensure_outdir(self):
         os.makedirs(self.cfg.output_dir, exist_ok=True)

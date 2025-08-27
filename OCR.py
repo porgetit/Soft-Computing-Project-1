@@ -1,4 +1,10 @@
-# digit_ocr.py
+# -*- coding: utf-8 -*-
+"""ocr
+
+OCR sencillo para dígitos individuales mediante Tesseract, con preprocesado
+orientado a imágenes pequeñas (celdas de Sudoku).
+"""
+
 import re
 from dataclasses import dataclass
 from typing import Optional
@@ -7,18 +13,19 @@ import pytesseract
 import numpy as np
 from collections import Counter
 
+
 @dataclass
 class DigitOCR:
     """
-    Simple OCR for single digits using PyTesseract.
-    - Set `tesseract_cmd` on Windows if Tesseract isn't on PATH.
-    - `psm=10` tells Tesseract to treat the image as a single character.
+    OCR simple para un solo dígito usando PyTesseract.
+    - En Windows, configure `tesseract_cmd` si Tesseract no está en PATH.
+    - `psm=10` indica a Tesseract tratar la imagen como un único carácter.
     """
     tesseract_cmd: Optional[str] = None
-    psm: int = 10   # 10: single char, 13: raw line (try 13 if your digits are thin)
+    psm: int = 10   # 10: single char, 13: raw line (pruebe 13 si los trazos son finos)
     oem: int = 3    # LSTM engine
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.tesseract_cmd:
             pytesseract.pytesseract.tesseract_cmd = self.tesseract_cmd
 
@@ -41,7 +48,7 @@ class DigitOCR:
         img = ImageOps.posterize(img, bits=3)
         img = img.point(lambda p: 255 if p > 110 else 0)
 
-        # 5) **Recorte de marco**: quita bordes oscuros que tocan el límite
+        # 5) Recorte de marco: quita bordes oscuros que tocan el límite
         arr = np.array(img)  # 0 = negro, 255 = blanco
         fg = (arr == 0)      # foreground
         ys, xs = np.where(fg)
@@ -59,7 +66,7 @@ class DigitOCR:
                 arr = arr[y0:y1, x0:x1]
                 img = Image.fromarray(arr)
 
-        # 6) Ahora sí, borde blanco de silencio
+        # 6) Borde blanco de silencio
         img = ImageOps.expand(img, border=8, fill=255)
         return img
 
@@ -67,10 +74,10 @@ class DigitOCR:
         img = Image.open(image_path)
         img = self._preprocess(img)
 
-        config = f'--oem {self.oem} --psm {self.psm} -c tessedit_char_whitelist=0123456789'
+        config = f"--oem {self.oem} --psm {self.psm} -c tessedit_char_whitelist=0123456789"
         text = pytesseract.image_to_string(img, config=config)
 
-        digits = re.findall(r'\d', text)
+        digits = re.findall(r"\d", text)
         if not digits:
             return 0  # vacío
 
@@ -79,3 +86,4 @@ class DigitOCR:
         if freq / len(digits) < 0.6:
             return 0
         return int(digit)
+
