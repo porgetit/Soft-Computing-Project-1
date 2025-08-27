@@ -5,6 +5,7 @@ from typing import Optional
 from PIL import Image, ImageOps, ImageFilter
 import pytesseract
 import numpy as np
+from collections import Counter
 
 @dataclass
 class DigitOCR:
@@ -41,18 +42,19 @@ class DigitOCR:
         img = img.point(lambda p: 255 if p > 110 else 0)
 
         # 5) **Recorte de marco**: quita bordes oscuros que tocan el límite
-        arr = np.array(img)                # 0 = negro, 255 = blanco
-        fg = (arr == 0)                    # foreground
+        arr = np.array(img)  # 0 = negro, 255 = blanco
+        fg = (arr == 0)      # foreground
         ys, xs = np.where(fg)
         if ys.size and xs.size:
-            y0, y1 = max(0, ys.min()-2), min(arr.shape[0], ys.max()+2)
-            x0, x1 = max(0, xs.min()-2), min(arr.shape[1], xs.max()+2)
-            # Si el recorte toca el borde, contrae un poco más para evitar la rejilla
-            pad = 4
-            y0 = min(max(y0 + pad, 0), arr.shape[0]-1)
-            x0 = min(max(x0 + pad, 0), arr.shape[1]-1)
-            y1 = max(min(y1 - pad, arr.shape[0]), 0)
-            x1 = max(min(x1 - pad, arr.shape[1]), 0)
+            y0, y1 = max(0, ys.min() - 2), min(arr.shape[0], ys.max() + 2)
+            x0, x1 = max(0, xs.min() - 2), min(arr.shape[1], xs.max() + 2)
+            # Contracción suave solo si toca el borde (para remover rejilla)
+            pad = 2
+            if y0 <= 0 or x0 <= 0 or y1 >= arr.shape[0] or x1 >= arr.shape[1]:
+                y0 = min(max(y0 + pad, 0), arr.shape[0] - 1)
+                x0 = min(max(x0 + pad, 0), arr.shape[1] - 1)
+                y1 = max(min(y1 - pad, arr.shape[0]), 0)
+                x1 = max(min(x1 - pad, arr.shape[1]), 0)
             if y1 > y0 and x1 > x0:
                 arr = arr[y0:y1, x0:x1]
                 img = Image.fromarray(arr)
@@ -72,9 +74,8 @@ class DigitOCR:
         if not digits:
             return 0  # vacío
 
-        unique = list(dict.fromkeys(digits))
-        if len(unique) != 1:
-            # En Sudoku es más seguro marcar como vacía que arriesgarse a errar
+        counts = Counter(digits)
+        digit, freq = counts.most_common(1)[0]
+        if freq / len(digits) < 0.6:
             return 0
-
-        return int(unique[0])
+        return int(digit)

@@ -1,0 +1,10 @@
+__pycache__/
+extracted_cells/
+extracted_cells_bin/
+*_edges.jpg
+*_thresh.jpg
+*_largest.jpg
+*_rectified*.jpg
+digit_knn_opencv.npz
+sudoku_grid.npy
+*.log
